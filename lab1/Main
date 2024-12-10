@@ -1,0 +1,43 @@
+class Client:
+    def __init__(self, surname, name, patronymic, address, phone):
+        self.surname = surname
+        self.name = name
+        self.patronymic = patronymic
+        self.address = address
+        self.phone = phone
+        self.validate()
+
+    @staticmethod
+    def validate_surname(surname):
+        if not surname.isalpha():
+            raise ValueError("Фамилия должна состоять только из букв")
+        return surname
+
+    @staticmethod
+    def validate_name(name):
+        if not name.isalpha():
+            raise ValueError("Имя должно состоять только из букв")
+        return name
+
+    @staticmethod
+    def validate_phone(phone):
+        if not phone.isdigit() or len(phone) != 10:
+            raise ValueError("Номер телефона должен состоять из 10 цифр")
+        return phone
+
+    def validate(self):
+        self.surname = self.validate_surname(self.surname)
+        self.name = self.validate_name(self.name)
+        self.phone = self.validate_phone(self.phone)
+
+    def __str__(self):
+        return f"{self.surname} {self.name[0]}. {self.patronymic[0]}."
+
+    def __eq__(self, other):
+        if not isinstance(other, Client):
+            return False
+        return self.phone == other.phone
+
+    @classmethod
+    def from_json(cls, json_data):
+        return cls(**json_data)
