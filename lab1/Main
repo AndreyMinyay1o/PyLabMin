@@ -56,3 +56,8 @@ class ShortClientInfo:
 
     def __str__(self):
         return f"{self.surname} {self.name[0]}. Телефон: {self.phone}"
+
+class ClientInfo(ShortClientInfo, Client):
+    def __init__(self, surname, name, patronymic, address, phone):
+        Client.__init__(self, surname, name, patronymic, address, phone)
+        ShortClientInfo.__init__(self, surname, name, phone)
