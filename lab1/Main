@@ -47,3 +47,12 @@ class Client:
 
     def full_version(self):
         return f"{self.surname} {self.name} {self.patronymic}, Адрес: {self.address}, Телефон: {self.phone}"
+
+class ShortClientInfo:
+    def __init__(self, surname, name, phone):
+        self.surname = surname
+        self.name = name
+        self.phone = phone
+
+    def __str__(self):
+        return f"{self.surname} {self.name[0]}. Телефон: {self.phone}"
