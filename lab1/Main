@@ -41,3 +41,9 @@ class Client:
     @classmethod
     def from_json(cls, json_data):
         return cls(**json_data)
+
+    def short_version(self):
+        return f"{self.surname} {self.name[0]}. {self.patronymic[0]}."
+
+    def full_version(self):
+        return f"{self.surname} {self.name} {self.patronymic}, Адрес: {self.address}, Телефон: {self.phone}"
