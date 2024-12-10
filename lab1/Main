@@ -16,14 +16,14 @@ class Validator:
         if not phone.isdigit() or len(phone) != 10:
             raise ValueError("Номер телефона должен состоять из 10 цифр")
         return phone
+
 class Client:
     def __init__(self, surname, name, patronymic, address, phone):
-        self.surname = surname
-        self.name = name
+        self.surname = Validator.validate_surname(surname)
+        self.name = Validator.validate_name(name)
+        self.phone = Validator.validate_phone(phone)
         self.patronymic = patronymic
         self.address = address
-        self.phone = phone
-        self.validate()
 
     def validate(self):
         self.surname = self.validate_surname(self.surname)
