@@ -1,12 +1,4 @@
-class Client:
-    def __init__(self, surname, name, patronymic, address, phone):
-        self.surname = surname
-        self.name = name
-        self.patronymic = patronymic
-        self.address = address
-        self.phone = phone
-        self.validate()
-
+class Validator:
     @staticmethod
     def validate_surname(surname):
         if not surname.isalpha():
@@ -24,6 +16,14 @@ class Client:
         if not phone.isdigit() or len(phone) != 10:
             raise ValueError("Номер телефона должен состоять из 10 цифр")
         return phone
+class Client:
+    def __init__(self, surname, name, patronymic, address, phone):
+        self.surname = surname
+        self.name = name
+        self.patronymic = patronymic
+        self.address = address
+        self.phone = phone
+        self.validate()
 
     def validate(self):
         self.surname = self.validate_surname(self.surname)
