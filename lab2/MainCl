@@ -157,3 +157,70 @@ class MyEntity_rep_yaml:
 
     def get_count(self):
         return len(self.entities)
+
+class MyEntity_rep:
+    def __init__(self, filename):
+        self.filename = filename
+        self.entities = self.read_from_file()
+
+    def read_from_file(self):
+        raise NotImplementedError("Метод должен быть реализован в дочерних классах")
+
+    def write_to_file(self):
+        raise NotImplementedError("Метод должен быть реализован в дочерних классах")
+
+    def get_by_id(self, entity_id):
+        for entity in self.entities:
+            if entity['id'] == entity_id:
+                return entity
+        return None
+
+    def get_k_n_short_list(self, k, n):
+        return self.entities[n * k: (n + 1) * k]
+
+    def sort_by_field(self, field):
+        self.entities.sort(key=lambda x: x.get(field))
+
+    def add_entity(self, entity):
+        entity['id'] = str(uuid.uuid4())
+        self.entities.append(entity)
+        self.write_to_file()
+
+    def replace_entity(self, entity_id, new_entity):
+        for i, entity in enumerate(self.entities):
+            if entity['id'] == entity_id:
+                self.entities[i] = new_entity
+                self.write_to_file()
+                return
+        raise ValueError(f"Entity with ID {entity_id} not found")
+
+    def delete_entity(self, entity_id):
+        self.entities = [entity for entity in self.entities if entity['id'] != entity_id]
+        self.write_to_file()
+
+    def get_count(self):
+        return len(self.entities)
+
+class MyEntity_rep_json(MyEntity_rep):
+    def read_from_file(self):
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def write_to_file(self):
+        with open(self.filename, 'w', encoding='utf-8') as file:
+            json.dump(self.entities, file, indent=4)
+
+class MyEntity_rep_yaml(MyEntity_rep):
+    def read_from_file(self):
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as file:
+                return yaml.safe_load(file)
+        except (FileNotFoundError, yaml.YAMLError):
+            return []
+
+    def write_to_file(self):
+        with open(self.filename, 'w', encoding='utf-8') as file:
+            yaml.dump(self.entities, file)
