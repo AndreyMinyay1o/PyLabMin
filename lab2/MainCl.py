@@ -234,7 +234,6 @@ class MyEntity_rep_DB:
         self._create_table()
 
     def _create_table(self):
-        """Создаём таблицу, если она ещё не существует"""
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS entities (
                 id TEXT PRIMARY KEY,
@@ -245,17 +244,15 @@ class MyEntity_rep_DB:
         self.connection.commit()
 
     def add_entity(self, entity):
-        """Добавить объект в базу данных с уникальным ID"""
-        entity_id = str(uuid.uuid4())  # Генерация уникального ID
+        entity_id = str(uuid.uuid4()) 
         self.cursor.execute('''
             INSERT INTO entities (id, name, surname) 
             VALUES (?, ?, ?)
         ''', (entity_id, entity['name'], entity['surname']))
         self.connection.commit()
-        return entity_id  # Возвращаем ID добавленного объекта
+        return entity_id 
 
     def get_by_id(self, entity_id):
-        """Получить объект по ID"""
         self.cursor.execute('''
             SELECT * FROM entities WHERE id = ?
         ''', (entity_id,))
@@ -265,7 +262,6 @@ class MyEntity_rep_DB:
         return None
 
     def get_k_n_short_list(self, k, n):
-        """Получить список k по счету n объектов"""
         self.cursor.execute('''
             SELECT * FROM entities LIMIT ?, ?
         ''', ((k-1)*n, n))
@@ -273,7 +269,6 @@ class MyEntity_rep_DB:
         return [{'id': row[0], 'name': row[1], 'surname': row[2]} for row in result]
 
     def sort_by_field(self, field):
-        """Сортировать элементы по выбранному полю"""
         self.cursor.execute(f'''
             SELECT * FROM entities ORDER BY {field}
         ''')
@@ -281,6 +276,82 @@ class MyEntity_rep_DB:
         return [{'id': row[0], 'name': row[1], 'surname': row[2]} for row in result]
 
     def get_count(self):
-        """Получить количество элементов"""
         self.cursor.execute('SELECT COUNT(*) FROM entities')
         return self.cursor.fetchone()[0]
+
+def test_json_operations():
+    print("\nTesting JSON Operations:")
+    json_filename = "entities.json"
+    entity_json_rep = MyEntity_rep_json(json_filename)
+
+    entity = {"name": "Andrey", "surname": "Minyaylo"}
+    entity_json_rep.add_entity(entity)
+
+    print("Added Entity:", entity)
+
+    print("Entity Count:", entity_json_rep.get_count())
+
+    entity_id = entity_json_rep.entities[0]['id']
+    print("Get Entity by ID:", entity_json_rep.get_by_id(entity_id))
+
+    entity_json_rep.sort_by_field("name")
+    print("Sorted Entities:", entity_json_rep.entities)
+
+    new_entity = {"id": entity_id, "name": "Dmitriy", "surname": "Liksukov"}
+    entity_json_rep.replace_entity(entity_id, new_entity)
+    print("Replaced Entity:", new_entity)
+
+    entity_json_rep.delete_entity(entity_id)
+    print("Entity Count after Deletion:", entity_json_rep.get_count())
+
+def test_yaml_operations():
+    print("\nTesting YAML Operations:")
+    yaml_filename = "entities.yaml"
+    entity_yaml_rep = MyEntity_rep_yaml(yaml_filename)
+
+    entity = {"name": "Andrey", "surname": "Minyaylo"}
+    entity_yaml_rep.add_entity(entity)
+
+    print("Added Entity:", entity)
+
+    print("Entity Count:", entity_yaml_rep.get_count())
+
+    entity_id = entity_yaml_rep.entities[0]['id']
+    print("Get Entity by ID:", entity_yaml_rep.get_by_id(entity_id))
+
+    entity_yaml_rep.sort_by_field("name")
+    print("Sorted Entities:", entity_yaml_rep.entities)
+
+    new_entity = {"id": entity_id, "name": "Dmitriy", "surname": "Liksukov"}
+    entity_yaml_rep.replace_entity(entity_id, new_entity)
+    print("Replaced Entity:", new_entity)
+
+    entity_yaml_rep.delete_entity(entity_id)
+    print("Entity Count after Deletion:", entity_yaml_rep.get_count())
+
+
+def test_db_operations():
+    print("\nTesting DB Operations:")
+    db_filename = "entities.db"
+    entity_db_rep = MyEntity_rep_DB(db_filename)
+
+    entity = {"name": "Andrey", "surname": "Minyaylo"}
+    entity_id = entity_db_rep.add_entity(entity)
+    print(f"Added Entity: {entity}, ID: {entity_id}")
+
+    entity_by_id = entity_db_rep.get_by_id(entity_id)
+    print("Get Entity by ID:", entity_by_id)
+
+    count = entity_db_rep.get_count()
+    print("Entity Count:", count)
+
+    sorted_entities = entity_db_rep.sort_by_field("name")
+    print("Sorted Entities:", sorted_entities)
+
+    k_n_list = entity_db_rep.get_k_n_short_list(2, 2)
+    print("K-N Short List:", k_n_list)
+
+if __name__ == "__main__":
+    test_json_operations()
+    test_yaml_operations()
+    test_db_operations()
