@@ -1,5 +1,7 @@
 import re
 import json
+import uuid
+import yaml
 
 class Validator:
     @staticmethod
@@ -106,6 +108,52 @@ class MyEntity_rep_json:
     def delete_entity(self, entity_id):
         self.entities = [entity for entity in self.entities if entity['id'] != entity_id]
         self._write_to_json()
+
+    def get_count(self):
+        return len(self.entities)
+
+class MyEntity_rep_yaml:
+    def __init__(self, filename):
+        self.filename = filename
+        self.entities = self._read_from_yaml()
+
+    def _read_from_yaml(self):
+        try:
+            with open(self.filename, "r", encoding="utf-8") as file:
+                data = yaml.safe_load(file) or []
+                return data
+        except FileNotFoundError:
+            return []
+
+    def _write_to_yaml(self):
+        with open(self.filename, "w", encoding="utf-8") as file:
+            yaml.dump(self.entities, file, default_flow_style=False, allow_unicode=True)
+
+    def get_by_id(self, entity_id):
+        return next((entity for entity in self.entities if entity['id'] == entity_id), None)
+
+    def get_k_n_short_list(self, k, n):
+        return self.entities[(k - 1) * n : k * n]
+
+    def sort_by_field(self, field):
+        self.entities.sort(key=lambda x: x.get(field, ""))
+
+    def add_entity(self, entity):
+        entity['id'] = str(uuid.uuid4())
+        self.entities.append(entity)
+        self._write_to_yaml()
+
+    def replace_entity(self, entity_id, new_entity):
+        for i, entity in enumerate(self.entities):
+            if entity['id'] == entity_id:
+                self.entities[i] = new_entity
+                self._write_to_yaml()
+                return
+        print(f"Entity with ID {entity_id} not found.")
+
+    def delete_entity(self, entity_id):
+        self.entities = [entity for entity in self.entities if entity['id'] != entity_id]
+        self._write_to_yaml()
 
     def get_count(self):
         return len(self.entities)
